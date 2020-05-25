@@ -30,7 +30,7 @@ export default {
 
   async mounted() {
     const functionName = 'hello-world'
-    const endpoint = `${process.env.BASE_URL}/.netlify/functions/${functionName}`
+    const endpoint = `${process.env.URL}/.netlify/functions/${functionName}`
 
     try {
       this.data = await this.$axios.$get(endpoint)

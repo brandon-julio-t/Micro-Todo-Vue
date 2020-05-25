@@ -93,6 +93,6 @@ export default {
    ** https://nuxtjs.org/api/configuration-env/
    */
   env: {
-    BASE_URL: process.env.BASE_URL
+    URL: process.env.URL
   }
 }

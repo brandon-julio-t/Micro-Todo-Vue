@@ -17,6 +17,12 @@ export default {
         content: process.env.npm_package_description || ''
       }
     ],
+    script: [
+      {
+        type: 'text/javascript',
+        src: 'https://identity.netlify.com/v1/netlify-identity-widget.js'
+      }
+    ],
     link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }]
   },
   /*

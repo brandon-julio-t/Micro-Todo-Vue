@@ -1,7 +1,11 @@
 exports.handler = async (event, context) => {
   console.log('event: ', event)
   console.log('context: ', context)
-  console.log('client context: ', context.clientContext)
+
+  const { identity, user } = context.clientContext
+
+  console.log('identity: ', identity)
+  console.log('user: ', user)
 
   try {
     const subject = event.queryStringParameters.name || 'World'

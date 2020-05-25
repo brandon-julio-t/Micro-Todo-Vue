@@ -6,6 +6,10 @@
       {{ data }}
     </p>
 
+    <p v-if="error">
+      {{ error }}
+    </p>
+
     <div id="identity"></div>
 
     <v-btn block @click="netlifyIdentity.open()">test</v-btn>
@@ -19,15 +23,20 @@ export default {
   data() {
     return {
       data: null,
+      error: null,
       netlifyIdentity
     }
   },
 
   async mounted() {
-    const functionName = 'hello-world?name=donald duck'
-    const endpoint = `http://localhost:8888/.netlify/functions/${functionName}`
+    const functionName = 'hello-world'
+    const endpoint = `${process.env.BASE_URL}/.netlify/functions/${functionName}`
 
-    this.data = await this.$axios.$get(endpoint)
+    try {
+      this.data = await this.$axios.$get(endpoint)
+    } catch (e) {
+      this.error = e
+    }
 
     netlifyIdentity.init({
       container: '#identity'

@@ -88,5 +88,11 @@ export default {
      ** You can extend webpack config here
      */
     extend(config, ctx) {}
+  },
+  /*
+   ** https://nuxtjs.org/api/configuration-env/
+   */
+  env: {
+    BASE_URL: process.env.BASE_URL
   }
 }

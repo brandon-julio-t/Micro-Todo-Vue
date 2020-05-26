@@ -12,7 +12,7 @@
       <v-card-title>An Error Occurred.</v-card-title>
 
       <v-card-text>
-        {{ $fetchState.error }}
+        {{ $fetchState.error.message }}
       </v-card-text>
 
       <v-card-actions>

@@ -86,7 +86,9 @@ export default {
     /*
      ** You can extend webpack config here
      */
-    extend(config, ctx) {}
+    extend(config, ctx) {
+      config.optimization.splitChunks.maxSize = 244000
+    }
   },
   /*
    ** https://nuxtjs.org/api/configuration-env/

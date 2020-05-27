@@ -5,34 +5,14 @@
 
       <v-spacer></v-spacer>
 
-      <v-btn v-if="user" icon @click="accountDrawer = !accountDrawer">
-        <v-icon>mdi-account</v-icon>
+      <v-btn v-if="user" @click="identity.logout">
+        Logout
       </v-btn>
       <span v-else>
-        <v-btn text @click="identity.open('signup')">
-          Sign up
-        </v-btn>
-        <v-btn text @click="identity.open('login')">Login</v-btn>
+        <v-btn @click="identity.open('signup')">Sign up</v-btn>
+        <v-btn @click="identity.open('login')">Login</v-btn>
       </span>
     </v-app-bar>
-
-    <v-navigation-drawer v-if="user" v-model="accountDrawer" app right>
-      <v-list>
-        <v-list-item-group>
-          <v-subheader class="title">{{ username }}</v-subheader>
-
-          <v-divider></v-divider>
-
-          <v-list-item @click="identity.logout()">
-            <v-list-item-content>
-              <v-list-item-title>
-                Logout
-              </v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-        </v-list-item-group>
-      </v-list>
-    </v-navigation-drawer>
 
     <v-content>
       <v-container>
@@ -68,20 +48,16 @@ export default {
   },
 
   mounted() {
-    identity.init()
+    identity.on('init', this.refreshUserStore)
     identity.on('login', this.refreshUserStore)
     identity.on('logout', this.refreshUserStore)
 
-    this.refreshUserStore()
+    identity.init()
   },
 
   methods: {
-    getUserFromLocalStorage() {
-      return JSON.parse(localStorage.getItem('gotrue.user'))
-    },
-
     refreshUserStore() {
-      this.$store.commit('setUser', this.getUserFromLocalStorage())
+      this.$store.commit('refreshUser')
     }
   }
 }

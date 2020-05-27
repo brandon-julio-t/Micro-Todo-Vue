@@ -2,6 +2,7 @@
   "name": "micro-todo-vue-functions",
   "version": "1.0.0",
   "description": "required dependencies for this app to work",
+  "main": "todos.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

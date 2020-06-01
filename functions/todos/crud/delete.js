@@ -1,11 +1,4 @@
-const faunadb = require('faunadb')
-
-const q = faunadb.query
-const client = new faunadb.Client({
-  secret: process.env.FAUNADB_SERVER_SECRET
-})
-
-exports.handler = async (event, context) => {
+module.exports = async ({ event, context, q, client }) => {
   try {
     const { todoId } = JSON.parse(event.body)
 

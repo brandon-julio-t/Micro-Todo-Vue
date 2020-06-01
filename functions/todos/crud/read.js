@@ -1,16 +1,11 @@
-const faunadb = require('faunadb')
-
-const q = faunadb.query
-const client = new faunadb.Client({
-  secret: process.env.FAUNADB_SERVER_SECRET
-})
-
-exports.handler = async (event, context) => {
+module.exports = async ({ event, context, q, client }) => {
   try {
     const { todoId } = event.queryStringParameters
     const userId = context.clientContext.user.sub
 
-    const response = todoId ? await getOne(todoId) : await getAll(userId)
+    const response = todoId
+      ? await getOne({ todoId, q, client })
+      : await getAll({ userId, q, client })
 
     if (todoId) {
       const todoBelongsToUser = response.data.user_id === userId
@@ -35,12 +30,12 @@ exports.handler = async (event, context) => {
   }
 }
 
-async function getOne(todoId) {
+async function getOne({ todoId, q, client }) {
   console.log('Searching for: ', todoId)
   return await client.query(q.Get(q.Ref(q.Collection('todos'), todoId)))
 }
 
-async function getAll(userId) {
+async function getAll({ userId, q, client }) {
   const indexName = 'all_user_todos'
 
   return await client.query(

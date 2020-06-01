@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Nuxt + Netlify Function",
   "author": "Brandon Julio Thenaro",
-  "private": true,
   "scripts": {
     "dev": "nuxt",
     "build": "nuxt build",

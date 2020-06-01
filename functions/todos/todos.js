@@ -1,8 +1,20 @@
-const methodAndModuleDictionary = {
-  DELETE: 'delete',
-  GET: 'read',
-  POST: 'create',
-  PUT: 'update'
+const faunadb = require('faunadb')
+
+const createTodo = require('./crud/create')
+const deleteTodo = require('./crud/delete')
+const readTodo = require('./crud/read')
+const updateTodo = require('./crud/update')
+
+const q = faunadb.query
+const client = new faunadb.Client({
+  secret: process.env.FAUNADB_SERVER_SECRET
+})
+
+const methodAndHandlerModuleDictionary = {
+  DELETE: deleteTodo,
+  GET: readTodo,
+  POST: createTodo,
+  PUT: updateTodo
 }
 
 exports.handler = async (event, context) => {
@@ -10,24 +22,18 @@ exports.handler = async (event, context) => {
     console.log('event: ', event)
     console.log('context: ', context)
 
-    if (!context.clientContext.user) {
-      return {
-        statusCode: 401
-      }
+    const { user } = context.clientContext
+    if (!user) {
+      return { statusCode: 401 }
     }
 
-    const moduleNameByHttpMethod = methodAndModuleDictionary[event.httpMethod]
-    if (!moduleNameByHttpMethod) {
-      return {
-        statusCode: 405
-      }
+    const { httpMethod } = event
+    const handlerModule = methodAndHandlerModuleDictionary[httpMethod]
+    if (!handlerModule) {
+      return { statusCode: 405 }
     }
 
-    const moduleName = `./crud/${moduleNameByHttpMethod}`
-
-    console.log('module name: ', moduleName)
-
-    const response = await require(moduleName).handler(event, context)
+    const response = await handlerModule({ event, context, q, client })
 
     console.log('response: ', response)
 

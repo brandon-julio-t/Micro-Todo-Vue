@@ -134,6 +134,12 @@ export default {
     }
   },
 
+  mounted() {
+    if (!this.todos) {
+      this.$fetch()
+    }
+  },
+
   methods: {
     async deleteTodo(id) {
       this.isWaitingForResponse = true

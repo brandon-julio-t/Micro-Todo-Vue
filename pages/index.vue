@@ -13,20 +13,30 @@
       </v-col>
     </v-row>
 
-    <VSkeletonLoader v-else-if="!todos" type="card" />
+    <v-row v-else-if="!todos" justify="center">
+      <v-col sm="6">
+        <VSkeletonLoader type="card" />
+      </v-col>
+    </v-row>
 
-    <app-hoverable-card v-else-if="todos.length === 0">
-      <v-card-title>You don't have any todo.</v-card-title>
+    <v-row v-else-if="todos.length === 0" justify="center">
+      <v-col sm="6">
+        <app-hoverable-card>
+          <v-card-title>You don't have any todo.</v-card-title>
 
-      <v-card-text>
-        You can start creating todo by pressing the pencil button on the bottom
-        right side of the screen or the button below.
-      </v-card-text>
+          <v-card-text>
+            You can start creating todo by pressing the pencil button on the
+            bottom right side of the screen or the button below.
+          </v-card-text>
 
-      <v-card-actions>
-        <v-btn block @click="showCreateTodoOverlay">Start Creating Todo</v-btn>
-      </v-card-actions>
-    </app-hoverable-card>
+          <v-card-actions>
+            <v-btn block @click="showCreateTodoOverlay">
+              Start Creating Todo
+            </v-btn>
+          </v-card-actions>
+        </app-hoverable-card>
+      </v-col>
+    </v-row>
 
     <div v-else>
       <h2>You have {{ todos.length }} todo(s)</h2>
@@ -129,8 +139,6 @@ export default {
     user(user) {
       if (user) {
         this.refreshTodos()
-      } else {
-        this.todos = []
       }
     }
   },
@@ -226,8 +234,6 @@ export default {
         )
 
         this.todos = data
-      } else {
-        this.todos = []
       }
     }
   }

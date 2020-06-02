@@ -116,6 +116,7 @@ import TheTodoForm from '~/components/TheTodoForm'
 
 export default {
   components: { TheTodoForm, AppHoverableCard },
+
   data() {
     return {
       greeting: null,

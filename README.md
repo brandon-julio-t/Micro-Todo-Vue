@@ -2,6 +2,18 @@
 
 > Nuxt + Netlify Function
 
+## Tech Stack
+
+- JAMStack
+- Netlify
+- Netlify Functions
+- Netlify Identity
+- Nuxt
+- REST API
+- Vue
+- Vuetify
+- FaunaDB
+
 ## Build Setup
 
 ```bash

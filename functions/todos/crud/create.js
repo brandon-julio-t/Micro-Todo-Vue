@@ -4,9 +4,7 @@ module.exports = async ({ event, context, q, client }) => {
     const collectionName = 'todos'
 
     const response = await client.query(
-      q.Create(q.Collection(collectionName), {
-        data: todoData
-      })
+      q.Create(q.Collection(collectionName), { data: todoData })
     )
 
     return {

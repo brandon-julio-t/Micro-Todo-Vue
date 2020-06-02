@@ -1,9 +1,9 @@
 module.exports = async ({ event, context, q, client }) => {
   try {
-    const { todoId } = JSON.parse(event.body)
+    const { id } = JSON.parse(event.body)
 
     const response = await client.query(
-      q.Delete(q.Ref(q.Collection('todos'), todoId))
+      q.Delete(q.Ref(q.Collection('todos'), id))
     )
 
     return {

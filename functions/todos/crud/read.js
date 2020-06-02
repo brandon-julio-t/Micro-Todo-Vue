@@ -10,9 +10,7 @@ module.exports = async ({ event, context, q, client }) => {
     if (todoId) {
       const todoBelongsToUser = response.data.user_id === userId
       if (!todoBelongsToUser) {
-        return {
-          statusCode: 401
-        }
+        return { statusCode: 401 }
       }
     }
 
@@ -31,7 +29,6 @@ module.exports = async ({ event, context, q, client }) => {
 }
 
 async function getOne({ todoId, q, client }) {
-  console.log('Searching for: ', todoId)
   return await client.query(q.Get(q.Ref(q.Collection('todos'), todoId)))
 }
 

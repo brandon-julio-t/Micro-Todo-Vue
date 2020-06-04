@@ -24,13 +24,13 @@ exports.handler = async (event, context) => {
 
     const { user } = context.clientContext
     if (!user) {
-      return { statusCode: 401 }
+      return { statusCode: 401, body: 'Unauthorized' }
     }
 
     const { httpMethod } = event
     const handlerModule = methodAndHandlerModuleDictionary[httpMethod]
     if (!handlerModule) {
-      return { statusCode: 405 }
+      return { statusCode: 405, body: 'Method not Allowed' }
     }
 
     const response = await handlerModule({ event, context, q, client })

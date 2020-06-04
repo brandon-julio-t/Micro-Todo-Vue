@@ -1,45 +1,49 @@
 <template>
-  <v-card :loading="isWaitingForResponse">
+  <v-card :loading="isWaitingForResponse" :light="!darkTheme">
     <v-card-title>
-      {{ actionName }} todo
+      {{ todoForm.actionName }} todo
+
       <v-spacer></v-spacer>
-      <v-btn icon @click="$emit('close-overlay')">
+
+      <v-btn icon @click="$emit('close')">
         <v-icon>mdi-close</v-icon>
       </v-btn>
     </v-card-title>
 
-    <v-subheader v-if="!newTodoDateAndTimeIsLater" class="red--text">
+    <v-subheader v-if="!todoDateAndTimeIsLater" class="red--text">
       Todo due date and time must be before now
     </v-subheader>
 
     <v-form ref="form" v-model="formIsValid">
       <v-card-text>
         <v-text-field
-          v-model="todoTitle"
           :rules="rulesTodoTitle"
+          :value="todoForm.title"
           clearable
           label="Todo Title"
-          required
+          @input="updateTitle"
         ></v-text-field>
 
-        <v-row justify="center" align="center">
-          <v-col>
+        <v-row justify="center">
+          <v-col cols="auto">
             <h2>Due Date</h2>
 
             <v-date-picker
-              v-model="todoDate"
+              :value="todoForm.date"
               :min="getTodayDate()"
               scrollable
+              @input="updateDate"
             ></v-date-picker>
           </v-col>
 
-          <v-col>
+          <v-col cols="auto">
             <h2>Due Time</h2>
 
             <v-time-picker
-              v-model="todoTime"
-              :min="todoDate === getTodayDate() ? getCurrentTime() : '00:00'"
+              :min="minTimeForTimePicker"
+              :value="todoForm.time"
               scrollable
+              @input="updateTime"
             ></v-time-picker>
           </v-col>
         </v-row>
@@ -60,7 +64,8 @@
             <v-btn
               :disabled="isWaitingForResponse"
               block
-              @click="$emit('close-overlay')"
+              color="error"
+              @click="$emit('close')"
             >
               Cancel
             </v-btn>
@@ -72,15 +77,14 @@
 </template>
 
 <script>
+import { mapGetters, mapMutations, mapState } from 'vuex'
+
 export default {
   name: 'TheTodoForm',
 
   data() {
     return {
-      todoId: null,
-      todoDate: null,
-      todoTime: null,
-      todoTitle: null,
+      oldForm: null,
 
       formIsValid: false,
       isWaitingForResponse: false,
@@ -90,74 +94,74 @@ export default {
   },
 
   computed: {
-    actionName() {
-      return this.$store.state.oldTodo.actionName
+    ...mapGetters({
+      nowISOHourAndMinute: 'todoForm/nowISOHourAndMinute',
+      toISODateTime: 'todoForm/toISODateTime',
+      todayISODate: 'todoForm/todayISODate',
+      todoAPIEndpoint: 'todoAPIEndpoint',
+      userToken: 'userToken'
+    }),
+
+    ...mapState(['todoForm', 'user']),
+
+    darkTheme() {
+      return this.$vuetify.theme.dark
     },
 
-    todoHasAnyChange() {
-      const {
-        date: oldDate,
-        time: oldTime,
-        title: oldTitle
-      } = this.$store.state.oldTodo
+    formHasAnyChange() {
+      const keys = Object.keys(this.todoForm)
+      for (const key of keys) {
+        const oldFormValue = this.oldForm[key]
+        const newFormValue = this.todoForm[key]
 
-      const oldTodoISODateTime = this.$store.getters['oldTodo/toISODateTime'](
-        oldDate,
-        oldTime
-      )
+        if (oldFormValue !== newFormValue) {
+          return true
+        }
+      }
 
-      return (
-        this.todoTitle !== oldTitle ||
-        oldTodoISODateTime !== this.newTodoISODateTime
-      )
+      return false
     },
 
-    newTodoISODateTime() {
-      return this.$store.getters['oldTodo/toISODateTime'](
-        this.todoDate,
-        this.todoTime
-      )
+    minTimeForTimePicker() {
+      return this.todoForm.date === this.getTodayDate()
+        ? this.getCurrentTime()
+        : '00:00'
     },
 
-    newTodoDateAndTimeIsLater() {
-      return Date.now() < new Date(this.newTodoISODateTime).getTime()
+    todoISODateTime() {
+      const { date, time } = this.todoForm
+      return this.toISODateTime(date, time)
     },
 
-    user() {
-      return this.$store.state.user
+    todoDateAndTimeIsLater() {
+      return Date.now() < new Date(this.todoISODateTime).getTime()
     }
   },
 
   mounted() {
-    const { date, id, time, title } = this.$store.state.oldTodo
-    this.todoId = id
-    this.todoTitle = title
-    this.todoDate = date
-    this.todoTime = time
+    this.oldForm = Object.assign({}, this.todoForm)
   },
 
   methods: {
-    getTodayDate() {
-      return this.$store.getters['oldTodo/todayISODate']()
-    },
-
-    getCurrentTime() {
-      return this.$store.getters['oldTodo/nowISOHourAndMinute']()
-    },
+    ...mapMutations({
+      updateDate: 'todoForm/updateDate',
+      updateTime: 'todoForm/updateTime',
+      updateTitle: 'todoForm/updateTitle'
+    }),
 
     async createOrUpdateTodoByAction() {
       this.$refs.form.validate()
 
       if (
         this.user &&
+        this.formHasAnyChange &&
         this.formIsValid &&
-        this.todoHasAnyChange &&
-        this.newTodoDateAndTimeIsLater
+        this.todoDateAndTimeIsLater
       ) {
         this.isWaitingForResponse = true
 
         let snackbarMessage = 'Todo '
-        switch (this.actionName) {
+        switch (this.todoForm.actionName) {
           case 'Create':
             await this.createTodo()
             snackbarMessage += 'created'
@@ -172,7 +176,7 @@ export default {
         this.$refs.form.reset()
         this.isWaitingForResponse = false
 
-        this.$emit('close-overlay')
+        this.$emit('close')
         this.$emit('refresh-todos')
         this.$emit('show-success-snackbar', snackbarMessage)
       }
@@ -180,27 +184,35 @@ export default {
 
     async createTodo() {
       const todoData = {
-        title: this.todoTitle,
+        title: this.todoForm.title,
         done: false,
-        due_date: this.newTodoISODateTime,
+        due_date: this.todoISODateTime,
         user_id: this.user.id
       }
 
-      this.$axios.setToken(this.user.token.access_token, 'Bearer')
-      await this.$axios.$post(this.$store.getters.todoAPIEndpoint, todoData)
+      this.$axios.setToken(this.userToken, 'Bearer')
+      await this.$axios.$post(this.todoAPIEndpoint, todoData)
+    },
+
+    getTodayDate() {
+      return this.todayISODate()
+    },
+
+    getCurrentTime() {
+      return this.nowISOHourAndMinute()
     },
 
     async updateTodo() {
       const todoData = {
-        title: this.todoTitle,
+        title: this.todoForm.title,
         done: false,
-        due_date: this.newTodoISODateTime,
+        due_date: this.todoISODateTime,
         user_id: this.user.id
       }
 
-      this.$axios.setToken(this.user.token.access_token, 'Bearer')
-      await this.$axios.$put(this.$store.getters.todoAPIEndpoint, {
-        id: this.todoId,
+      this.$axios.setToken(this.userToken, 'Bearer')
+      await this.$axios.$put(this.todoAPIEndpoint, {
+        id: this.todoForm.id,
         data: todoData
       })
     }

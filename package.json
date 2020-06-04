@@ -1,6 +1,6 @@
 {
-  "name": "Micro-Todo-Vue",
-  "version": "0.1.0",
+  "name": "micro-todo-vue",
+  "version": "0.1.1",
   "description": "Nuxt + Netlify Function",
   "author": "Brandon Julio Thenaro",
   "scripts": {
@@ -16,7 +16,7 @@
     "@nuxtjs/axios": "^5.3.6",
     "@nuxtjs/dotenv": "^1.4.0",
     "@nuxtjs/pwa": "^3.0.0-0",
-    "faunadb": "^2.14.1",
+    "faunadb": "^2.14.2",
     "netlify-identity-widget": "^1.6.0",
     "nuxt": "^2.0.0"
   },

@@ -95,10 +95,5 @@ export default {
    */
   env: {
     URL: process.env.URL
-  },
-  typescript: {
-    typeCheck: {
-      eslint: true
-    }
   }
 }

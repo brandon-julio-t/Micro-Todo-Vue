@@ -1,4 +1,4 @@
-module.exports = async ({ event, context, q, client }) => {
+module.exports = async ({ event, _, q, client }) => {
   try {
     const { id } = JSON.parse(event.body)
 

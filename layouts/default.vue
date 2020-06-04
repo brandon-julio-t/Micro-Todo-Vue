@@ -1,7 +1,12 @@
 <template>
   <v-app>
     <v-app-bar app>
-      <v-toolbar-title>Micro Todo Vue</v-toolbar-title>
+      <v-toolbar-title>
+        <v-btn icon @click="toggleTheme">
+          <v-icon v-if="darkTheme">mdi-brightness-7</v-icon>
+          <v-icon v-else>mdi-brightness-3</v-icon>
+        </v-btn>
+      </v-toolbar-title>
 
       <v-spacer></v-spacer>
 
@@ -27,6 +32,8 @@
 </template>
 
 <script>
+import { mapMutations, mapState } from 'vuex'
+
 import identity from 'netlify-identity-widget'
 
 export default {
@@ -38,26 +45,30 @@ export default {
   },
 
   computed: {
-    user() {
-      return this.$store.state.user
+    ...mapState(['user']),
+
+    darkTheme() {
+      return this.$vuetify.theme.dark
     },
 
     username() {
-      return this.user ? this.user.user_metadata.full_name : 'Guest'
+      return this.user?.user_metadata?.full_name ?? 'Guest'
     }
   },
 
   mounted() {
-    identity.on('init', this.refreshUserStore)
-    identity.on('login', this.refreshUserStore)
-    identity.on('logout', this.refreshUserStore)
+    identity.on('init', this.refreshUser)
+    identity.on('login', this.refreshUser)
+    identity.on('logout', this.refreshUser)
 
     identity.init()
   },
 
   methods: {
-    refreshUserStore() {
-      this.$store.commit('refreshUser')
+    ...mapMutations(['refreshUser']),
+
+    toggleTheme() {
+      this.$vuetify.theme.dark = !this.$vuetify.theme.dark
     }
   }
 }

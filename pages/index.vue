@@ -1,170 +1,84 @@
 <template>
   <v-container>
-    <v-row v-if="!user" justify="center">
-      <v-col sm="6">
-        <app-hoverable-card>
-          <v-card-title>You Are Not Logged In</v-card-title>
+    <TheNotLoggedCard v-if="!user" />
+    <TheLoadingSkeletonCard v-else-if="isWaitingForResponse" />
+    <TheEmptyTodoCard v-else-if="todos.length === 0" />
 
-          <v-card-text>
-            Please login/sign up first by clicking the login/sign up button
-            located at the top right side to use this app.
-          </v-card-text>
-        </app-hoverable-card>
-      </v-col>
-    </v-row>
+    <AllTodos v-else @show-edit-todo-overlay="showEditTodoOverlay" />
 
-    <v-row v-else-if="!todos" justify="center">
-      <v-col sm="6">
-        <VSkeletonLoader type="card" />
-      </v-col>
-    </v-row>
-
-    <v-row v-else-if="todos.length === 0" justify="center">
-      <v-col sm="6">
-        <app-hoverable-card>
-          <v-card-title>You don't have any todo.</v-card-title>
-
-          <v-card-text>
-            You can start creating todo by pressing the pencil button on the
-            bottom right side of the screen or the button below.
-          </v-card-text>
-
-          <v-card-actions>
-            <v-btn block @click="showCreateTodoOverlay">
-              Start Creating Todo
-            </v-btn>
-          </v-card-actions>
-        </app-hoverable-card>
-      </v-col>
-    </v-row>
-
-    <div v-else>
-      <h2>You have {{ todos.length }} todo(s)</h2>
-
-      <v-row>
-        <v-col
-          v-for="todo in todos"
-          :key="getTodoId(todo)"
-          cols="12"
-          lg="2"
-          sm="4"
-        >
-          <app-hoverable-card :loading="isWaitingForResponse">
-            <v-card-title>
-              {{ todo.data.title }}
-
-              <v-spacer></v-spacer>
-
-              <v-checkbox
-                v-model="todo.data.done"
-                :disabled="isWaitingForResponse"
-                @change="markTodoDoneStatus(todo)"
-              ></v-checkbox>
-            </v-card-title>
-
-            <v-card-subtitle>
-              Due:
-              {{ prettyFormatDateTime(todo.data.due_date) }}
-            </v-card-subtitle>
-
-            <v-card-actions>
-              <v-btn
-                :disabled="isWaitingForResponse"
-                icon
-                @click="showEditTodoOverlay(todo)"
-              >
-                <v-icon>mdi-square-edit-outline</v-icon>
-              </v-btn>
-              <v-btn :disabled="isWaitingForResponse" icon>
-                <v-icon @click="deleteTodo(getTodoId(todo))">
-                  mdi-trash-can
-                </v-icon>
-              </v-btn>
-            </v-card-actions>
-          </app-hoverable-card>
-        </v-col>
-      </v-row>
-    </div>
-
-    <v-overlay :value="showOverlay">
+    <v-dialog v-model="showTodoFormDialog" persistent max-width="700px">
       <TheTodoForm
-        @close-overlay="showOverlay = false"
+        @close="showTodoFormDialog = false"
         @refresh-todos="refreshTodos"
         @show-success-snackbar="showSnackbar"
       />
-    </v-overlay>
+    </v-dialog>
 
-    <v-fab-transition v-if="user">
-      <v-btn bottom fab fixed right @click="showCreateTodoOverlay">
-        <v-icon>mdi-pencil</v-icon>
-      </v-btn>
-    </v-fab-transition>
+    <TheFABButton
+      v-if="user"
+      @show-create-todo-overlay="showCreateTodoOverlay"
+    />
 
-    <v-snackbar v-model="showSuccessSnackbar">
-      {{ snackbarMessage }}
-
-      <v-btn icon color="white" @click="showSuccessSnackbar = false">
-        <v-icon>mdi-close</v-icon>
-      </v-btn>
-    </v-snackbar>
+    <TheSnackbar :message="snackbarMessage" :show.sync="showSuccessSnackbar" />
   </v-container>
 </template>
 
 <script>
-import AppHoverableCard from '~/components/common/AppHoverableCard'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+
+import AllTodos from '~/components/AllTodos'
+import TheEmptyTodoCard from '~/components/TheEmptyTodoCard'
+import TheFABButton from '~/components/TheFABButton'
+import TheLoadingSkeletonCard from '~/components/TheLoadingSkeletonCard'
+import TheNotLoggedCard from '~/components/TheNotLoggedCard'
+import TheSnackbar from '~/components/TheSnackbar'
 import TheTodoForm from '~/components/TheTodoForm'
 
 export default {
-  components: { TheTodoForm, AppHoverableCard },
+  components: {
+    AllTodos,
+    TheEmptyTodoCard,
+    TheFABButton,
+    TheLoadingSkeletonCard,
+    TheNotLoggedCard,
+    TheSnackbar,
+    TheTodoForm
+  },
 
   data() {
     return {
       greeting: null,
-      todos: null,
 
       snackbarMessage: '',
 
       isWaitingForResponse: false,
-      showOverlay: false,
+      showTodoFormDialog: false,
       showSuccessSnackbar: false
     }
   },
 
   computed: {
-    user() {
-      return this.$store.state.user
-    }
+    ...mapGetters(['getTodoId']),
+    ...mapState(['todos', 'user'])
   },
 
   watch: {
-    user(user) {
+    async user(user) {
       if (user) {
-        this.refreshTodos()
+        this.isWaitingForResponse = true
+        await this.refreshTodos()
+        this.isWaitingForResponse = false
       }
     }
   },
 
-  mounted() {
-    this.refreshTodos()
-  },
-
   methods: {
-    async deleteTodo(id) {
-      this.isWaitingForResponse = true
+    ...mapActions(['refreshTodos']),
 
-      if (this.user) {
-        this.$axios.setToken(this.user.token.access_token, 'Bearer')
-
-        const url = this.$store.getters.todoAPIEndpoint
-        await this.$axios.$delete(url, {
-          data: { id }
-        })
-
-        await this.refreshTodos()
-      }
-
-      this.isWaitingForResponse = false
-    },
+    ...mapMutations({
+      changeTodoFormToCreateMode: 'todoForm/createMode',
+      changeTodoFormToUpdateMode: 'todoForm/updateMode'
+    }),
 
     extractDate(isoDate) {
       return isoDate.substring(0, 10)
@@ -174,68 +88,28 @@ export default {
       return new Date(isoDate).toTimeString().substring(0, 5)
     },
 
-    getTodoId(todo) {
-      return todo.ref['@ref'].id
-    },
-
-    async markTodoDoneStatus(todo) {
-      if (this.user) {
-        const { data } = todo
-
-        this.isWaitingForResponse = true
-        this.$axios.setToken(this.user.token.access_token, 'Bearer')
-
-        await this.$axios.$put(this.$store.getterse.todoAPIEndpoint, {
-          id: this.getTodoId(todo),
-          data
-        })
-
-        this.isWaitingForResponse = false
-        this.showSnackbar(`Todo marked as ${data.done ? '' : 'not'} done`)
-      }
-    },
-
-    prettyFormatDateTime(datetime) {
-      return new Intl.DateTimeFormat(undefined, {
-        timeStyle: 'short',
-        dateStyle: 'medium'
-      }).format(new Date(datetime))
-    },
-
     showCreateTodoOverlay() {
-      this.$store.commit('oldTodo/createTodo')
-      this.showOverlay = true
+      this.changeTodoFormToCreateMode()
+      this.showTodoFormDialog = true
     },
 
     showEditTodoOverlay(todo) {
       const { title, due_date: dueDate } = todo.data
       const id = this.getTodoId(todo)
 
-      this.$store.commit('oldTodo/updateTodo', {
+      this.changeTodoFormToUpdateMode({
         date: this.extractDate(dueDate),
         id,
         time: this.extractTime(dueDate),
         title
       })
 
-      this.showOverlay = true
+      this.showTodoFormDialog = true
     },
 
     showSnackbar(message) {
       this.showSuccessSnackbar = true
       this.snackbarMessage = message
-    },
-
-    async refreshTodos() {
-      if (this.user) {
-        this.$axios.setToken(this.user.token.access_token, 'Bearer')
-
-        const { data } = await this.$axios.$get(
-          this.$store.getters.todoAPIEndpoint
-        )
-
-        this.todos = data
-      }
     }
   }
 }

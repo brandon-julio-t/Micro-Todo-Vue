@@ -14,18 +14,30 @@ export const getters = {
 }
 
 export const mutations = {
-  createTodo(state) {
+  createMode(state) {
     state.actionName = 'Create'
     state.date = getters.todayISODate()()
     state.time = getters.nowISOHourAndMinute()()
     state.title = ''
   },
 
-  updateTodo(state, { date, id, time, title }) {
+  updateMode(state, { date, id, time, title }) {
     state.actionName = 'Edit'
     state.date = date
     state.id = id
     state.time = time
     state.title = title
+  },
+
+  updateDate(state, newDate) {
+    state.date = newDate
+  },
+
+  updateTime(state, newTime) {
+    state.time = newTime
+  },
+
+  updateTitle(state, newTitle) {
+    state.title = newTitle
   }
 }

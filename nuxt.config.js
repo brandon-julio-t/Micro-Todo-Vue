@@ -41,7 +41,7 @@ export default {
    ** Nuxt.js dev-modules
    */
   buildModules: [
-    // Doc: https://github.com/nuxt-community/eslint-module
+    '@nuxt/typescript-build',
     '@nuxtjs/eslint-module',
     '@nuxtjs/vuetify'
   ],
@@ -86,7 +86,7 @@ export default {
     /*
      ** You can extend webpack config here
      */
-    extend(config, ctx) {
+    extend(config, _) {
       config.optimization.splitChunks.maxSize = 244000
     }
   },

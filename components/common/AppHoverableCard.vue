@@ -1,6 +1,6 @@
 <template>
   <v-hover v-slot:default="{ hover }">
-    <v-card :elevation="hover ? 8 : 2" :loading="loading">
+    <v-card :raised="hover" :loading="loading">
       <slot></slot>
     </v-card>
   </v-hover>

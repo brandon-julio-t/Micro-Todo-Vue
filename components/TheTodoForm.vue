@@ -49,28 +49,20 @@
         </v-row>
       </v-card-text>
 
-      <v-card-actions>
-        <v-row>
-          <v-col>
-            <v-btn
-              :disabled="isWaitingForResponse"
-              block
-              @click="createOrUpdateTodoByAction"
-            >
-              Submit
-            </v-btn>
-          </v-col>
-          <v-col>
-            <v-btn
-              :disabled="isWaitingForResponse"
-              block
-              color="error"
-              @click="$emit('close')"
-            >
-              Cancel
-            </v-btn>
-          </v-col>
-        </v-row>
+      <v-card-actions class="d-flex justify-space-around">
+        <v-btn
+          :disabled="isWaitingForResponse"
+          @click="createOrUpdateTodoByAction"
+        >
+          Submit
+        </v-btn>
+        <v-btn
+          :disabled="isWaitingForResponse"
+          color="error"
+          @click="$emit('close')"
+        >
+          Cancel
+        </v-btn>
       </v-card-actions>
     </v-form>
   </v-card>

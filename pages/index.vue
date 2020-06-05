@@ -4,7 +4,7 @@
     <TheLoadingSkeletonCard v-else-if="isWaitingForResponse" />
     <TheEmptyTodoCard v-else-if="todos.length === 0" />
 
-    <AllTodos v-else @show-edit-todo-overlay="showEditTodoOverlay" />
+    <TheTodos v-else @show-edit-todo-overlay="showEditTodoOverlay" />
 
     <v-dialog v-model="showTodoFormDialog" persistent max-width="700px">
       <TheTodoForm
@@ -26,23 +26,23 @@
 <script>
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 
-import AllTodos from '~/components/AllTodos'
 import TheEmptyTodoCard from '~/components/TheEmptyTodoCard'
 import TheFABButton from '~/components/TheFABButton'
 import TheLoadingSkeletonCard from '~/components/TheLoadingSkeletonCard'
 import TheNotLoggedCard from '~/components/TheNotLoggedCard'
 import TheSnackbar from '~/components/TheSnackbar'
 import TheTodoForm from '~/components/TheTodoForm'
+import TheTodos from '~/components/TheTodos'
 
 export default {
   components: {
-    AllTodos,
     TheEmptyTodoCard,
     TheFABButton,
     TheLoadingSkeletonCard,
     TheNotLoggedCard,
     TheSnackbar,
-    TheTodoForm
+    TheTodoForm,
+    TheTodos
   },
 
   data() {

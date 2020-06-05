@@ -1,3 +1,5 @@
+import identity from 'netlify-identity-widget'
+
 export const state = () => ({
   user: null,
   todos: []
@@ -14,7 +16,21 @@ export const getters = {
 
 export const mutations = {
   refreshUser(state) {
-    state.user = JSON.parse(localStorage.getItem('gotrue.user'))
+    // The reason I'm using `Object.assign` here is because
+    // `identity.currentUser()` returns an 'e' or 'event' object and by
+    // assigning it to `state.user`, `state.user` becomes and 'event' object,
+    // and mutating `state.user`, that is now and 'event' object, somehow
+    // results in Vuex error:
+    // "[vuex] do not mutate vuex store state outside mutation handlers."
+    //
+    // Hence I'm converting and 'event' object into a regular object by using
+    // `Object.assign`, and it works ¯\_(ツ)_/¯.
+    state.user = Object.assign({}, identity.currentUser())
+  },
+
+  resetStore(state) {
+    state.user = null
+    state.todos = []
   },
 
   setTodos(state, data) {
@@ -49,7 +65,10 @@ export const actions = {
 
       commit('setTodos', data)
     }
+  },
+
+  async refreshTokenAndUser({ commit }) {
+    await identity.refresh()
+    commit('refreshUser')
   }
 }
-
-// const getUnix = (date) => new Date(date).getTime()

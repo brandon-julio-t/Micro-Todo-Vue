@@ -5,11 +5,18 @@
 
       <v-spacer></v-spacer>
 
-      <v-checkbox
-        :disabled="isWaitingForResponse"
-        :input-value="todo.data.done"
-        @change="updateTodoDoneStatus(todo)"
-      ></v-checkbox>
+      <v-tooltip top>
+        <template v-slot:activator="{ on }">
+          <v-checkbox
+            :disabled="isWaitingForResponse"
+            :input-value="todo.data.done"
+            v-on="on"
+            @change="updateTodoDoneStatus(todo)"
+          ></v-checkbox>
+        </template>
+
+        <span>Mark as {{ todo.data.done ? 'undone' : 'done' }}</span>
+      </v-tooltip>
     </v-card-title>
 
     <v-card-subtitle
@@ -20,31 +27,51 @@
     </v-card-subtitle>
 
     <v-card-actions>
-      <v-btn
-        v-if="!todo.data.done"
-        :disabled="isWaitingForResponse"
-        icon
-        @click="$emit('show-edit-todo-overlay', todo)"
-      >
-        <v-icon>mdi-square-edit-outline</v-icon>
-      </v-btn>
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on }">
+          <v-btn
+            v-if="!todo.data.done"
+            :disabled="isWaitingForResponse"
+            icon
+            v-on="on"
+            @click="$emit('show-edit-todo-overlay', todo)"
+          >
+            <v-icon>mdi-square-edit-outline</v-icon>
+          </v-btn>
+        </template>
 
-      <v-btn :disabled="isWaitingForResponse" color="red" icon>
-        <v-icon @click="deleteTodo(todo)">
-          mdi-trash-can
-        </v-icon>
-      </v-btn>
+        <span>Edit to-do</span>
+      </v-tooltip>
+
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on }">
+          <v-btn :disabled="isWaitingForResponse" color="red" icon v-on="on">
+            <v-icon @click="deleteTodo(todo)">
+              mdi-trash-can
+            </v-icon>
+          </v-btn>
+        </template>
+
+        <span>Delete to-do</span>
+      </v-tooltip>
 
       <v-spacer></v-spacer>
 
       <span v-if="!todo.data.done">
-        <v-btn
-          :disabled="isWaitingForResponse"
-          icon
-          @click="decreasePriority(todo)"
-        >
-          <v-icon>mdi-minus</v-icon>
-        </v-btn>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn
+              :disabled="isWaitingForResponse"
+              icon
+              v-on="on"
+              @click="decreasePriority(todo)"
+            >
+              <v-icon>mdi-minus</v-icon>
+            </v-btn>
+          </template>
+
+          <span>Decrease priority</span>
+        </v-tooltip>
 
         <span
           v-for="i in Array(todo.data.priority)"
@@ -54,13 +81,20 @@
           !
         </span>
 
-        <v-btn
-          :disabled="isWaitingForResponse"
-          icon
-          @click="increasePriority(todo)"
-        >
-          <v-icon>mdi-plus</v-icon>
-        </v-btn>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
+            <v-btn
+              :disabled="isWaitingForResponse"
+              icon
+              v-on="on"
+              @click="increasePriority(todo)"
+            >
+              <v-icon>mdi-plus</v-icon>
+            </v-btn>
+          </template>
+
+          <span>Increase priority</span>
+        </v-tooltip>
       </span>
     </v-card-actions>
   </app-hoverable-card>

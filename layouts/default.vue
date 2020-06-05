@@ -10,7 +10,7 @@
 
       <v-spacer></v-spacer>
 
-      <v-btn v-if="user" @click="identity.logout">
+      <v-btn v-if="user" @click="showLogoutProgressAndLogout">
         Logout
       </v-btn>
       <span v-else>
@@ -28,18 +28,23 @@
 
       <nuxt />
     </v-content>
+
+    <TheLogoutDialog :is-logging-out="isLoggingOut" />
   </v-app>
 </template>
 
 <script>
-import { mapMutations, mapState } from 'vuex'
+import { mapActions, mapMutations, mapState } from 'vuex'
 
 import identity from 'netlify-identity-widget'
+import TheLogoutDialog from '~/components/TheLogoutDialog'
 
 export default {
+  components: { TheLogoutDialog },
   data() {
     return {
       accountDrawer: false,
+      isLoggingOut: false,
       identity
     }
   },
@@ -52,20 +57,29 @@ export default {
     },
 
     username() {
-      return this.user?.user_metadata?.full_name ?? 'Guest'
+      return this.user?.user_metadata?.full_name ?? 'There'
     }
   },
 
   mounted() {
-    identity.on('init', this.refreshUser)
-    identity.on('login', this.refreshUser)
-    identity.on('logout', this.refreshUser)
+    identity.on('init', this.refreshTokenAndUser)
+    identity.on('login', this.refreshTokenAndUser)
+    identity.on('logout', () => {
+      this.resetStore()
+      this.isLoggingOut = false
+    })
 
     identity.init()
   },
 
   methods: {
-    ...mapMutations(['refreshUser']),
+    ...mapActions(['refreshTokenAndUser']),
+    ...mapMutations(['resetStore']),
+
+    showLogoutProgressAndLogout() {
+      this.isLoggingOut = true
+      identity.logout()
+    },
 
     toggleTheme() {
       this.$vuetify.theme.dark = !this.$vuetify.theme.dark

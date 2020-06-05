@@ -1,7 +1,7 @@
 <template>
   <section>
     <div class="my-12">
-      <h2>You have {{ undoneTodos.length }} todo(s)</h2>
+      <h2>You have {{ undoneTodos.length }} to-do(s)</h2>
 
       <v-row>
         <v-col
@@ -19,7 +19,7 @@
     </div>
 
     <div class="my-12">
-      <h2>You have done {{ doneTodos.length }} todo(s)</h2>
+      <h2>You have done {{ doneTodos.length }} to-do(s)</h2>
 
       <v-row>
         <v-col

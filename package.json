@@ -1,6 +1,6 @@
 {
   "name": "micro-todo-vue",
-  "version": "0.2.0",
+  "version": "0.3.1",
   "description": "Nuxt + Netlify Function",
   "author": "Brandon Julio Thenaro",
   "scripts": {

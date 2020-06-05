@@ -184,9 +184,10 @@ export default {
 
     async createTodo() {
       const todoData = {
-        title: this.todoForm.title,
         done: false,
         due_date: this.todoISODateTime,
+        priority: 0,
+        title: this.todoForm.title,
         user_id: this.user.id
       }
 

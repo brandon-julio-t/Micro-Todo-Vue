@@ -1,26 +1,35 @@
 <template>
   <section>
-    <h2>You have {{ todos.length }} todo(s)</h2>
+    <div>
+      <h2>You have {{ undoneTodos.length }} todo(s)</h2>
 
-    <v-row>
-      <v-col
-        v-for="(todo, index) in todos"
-        :key="index"
-        cols="12"
-        lg="2"
-        sm="4"
-      >
-        <TheTodoCard
-          :todo="todo"
-          @show-edit-todo-overlay="$emit('show-edit-todo-overlay', todo)"
-        />
-      </v-col>
-    </v-row>
+      <v-row>
+        <v-col v-for="todo in undoneTodos" :key="getTodoId(todo)" cols="auto">
+          <TheTodoCard
+            :todo="todo"
+            @show-edit-todo-overlay="$emit('show-edit-todo-overlay', todo)"
+          />
+        </v-col>
+      </v-row>
+    </div>
+
+    <div>
+      <h2>You have done {{ doneTodos.length }} todo(s)</h2>
+
+      <v-row>
+        <v-col v-for="todo in doneTodos" :key="getTodoId(todo)" cols="auto">
+          <TheTodoCard
+            :todo="todo"
+            @show-edit-todo-overlay="$emit('show-edit-todo-overlay', todo)"
+          />
+        </v-col>
+      </v-row>
+    </div>
   </section>
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 
 import TheTodoCard from '~/components/TheTodoCard'
 
@@ -30,6 +39,7 @@ export default {
   components: { TheTodoCard },
 
   computed: {
+    ...mapGetters(['doneTodos', 'getTodoId', 'undoneTodos']),
     ...mapState(['todos'])
   }
 }
